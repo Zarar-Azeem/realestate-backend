@@ -9,9 +9,19 @@ type reqBody = {
 
 export const getProperties : RequestHandler =  async (req: Request ,res: Response , next: NextFunction)=>{
     try {
-        
         const properties = await Property.find().exec()
         
+        res.status(200).json(properties)
+    } catch (error) {
+        next(error)
+    }
+}
+
+export const getUserProperties : RequestHandler =  async (req: Request ,res: Response , next: NextFunction)=>{
+    try {
+
+        console.log(req.user.name)
+        const properties = await Property.find({user:req.user}).exec()
         res.status(200).json(properties)
     } catch (error) {
         next(error)
@@ -50,7 +60,7 @@ export const getProperty = async (req: Request ,res: Response , next: NextFuncti
 }
 
 export const getUserProperty = async (req: Request ,res: Response , next: NextFunction)=>{
-
+    
     try{
 
         const property = await Property.find({user:req.user})
@@ -79,7 +89,7 @@ export const updateProperty = async (req: Request ,res: Response , next: NextFun
 
         let property : Property | null = await Property.findById(id)
 
-        if(property!.user.toString() != req.user){
+        if(property!.user.toString() != req.user._id){
             return res.status(400).json({message: "Not Allowed"})
         }
 
@@ -104,7 +114,7 @@ export const deleteProperty = async (req: Request ,res: Response , next: NextFun
 
         let property : Property | null = await Property.findById(id)
 
-        if(property!.user.toString() != req.user){
+        if(property!.user.toString() != req.user._id){
             return res.status(400).json({message: "Not Allowed"})
         }
 

@@ -4,7 +4,7 @@ import jwt from "jsonwebtoken"
 import User from "../models/userModel"
 import env from "../utils/validateEnv"
 
-type regsiterUser = {
+type registerUser = {
     name: string
     email:string
     password:string
@@ -12,7 +12,7 @@ type regsiterUser = {
 
 export const registerUser : RequestHandler = async (req :Request, res: Response , next : NextFunction)=>{
 
-    const  {name, email, password} : regsiterUser = req.body
+    const  {name, email, password} : registerUser = req.body
     
     try {
 
@@ -61,7 +61,7 @@ export const loginUser : RequestHandler = async (req :Request, res: Response , n
 
         let success = false
 
-        if(!email || ! password){
+        if(!email || !password){
             return res.status(401).json({success, message:"Please enter all fields"})
         }
 
@@ -77,7 +77,7 @@ export const loginUser : RequestHandler = async (req :Request, res: Response , n
             return res.status(401).json({success , message : "Enter correct credentials"})
         }
 
-        const token = jwt.sign({user:user._id}, env.JWT_TOKEN)
+        const token = jwt.sign({user:user}, env.JWT_TOKEN)
 
         success = true
 
