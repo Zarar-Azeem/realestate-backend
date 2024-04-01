@@ -36,7 +36,13 @@ export const registerUser : RequestHandler = async (req :Request, res: Response 
             password:secpass
         })
 
-        const token = jwt.sign({user:user.id}, env.JWT_TOKEN)
+        const payload = {
+            id: user._id,
+            name: name
+        }
+
+        const token = jwt.sign({user:payload}, env.JWT_TOKEN)
+
 
         success = true
 
@@ -77,7 +83,12 @@ export const loginUser : RequestHandler = async (req :Request, res: Response , n
             return res.status(401).json({success , message : "Enter correct credentials"})
         }
 
-        const token = jwt.sign({user:user}, env.JWT_TOKEN)
+        const payload = {
+            id: user._id,
+            name: user.name
+        }
+
+        const token = jwt.sign({user:payload}, env.JWT_TOKEN)
 
         success = true
 
@@ -88,4 +99,3 @@ export const loginUser : RequestHandler = async (req :Request, res: Response , n
     }
 
 }
-

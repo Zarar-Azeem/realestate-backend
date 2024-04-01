@@ -20,8 +20,7 @@ export const getProperties : RequestHandler =  async (req: Request ,res: Respons
 export const getUserProperties : RequestHandler =  async (req: Request ,res: Response , next: NextFunction)=>{
     try {
 
-        console.log(req.user.name)
-        const properties = await Property.find({user:req.user}).exec()
+        const properties = await Property.find({userId:req.user.id}).exec()
         res.status(200).json(properties)
     } catch (error) {
         next(error)
@@ -35,7 +34,7 @@ export const createProperty : RequestHandler = async (req: Request ,res: Respons
 
     try {
         const property  =  new Property({
-            user:req.user,
+            userId:req.user.id,
             title,
             body ,
             description:description
@@ -63,7 +62,7 @@ export const getUserProperty = async (req: Request ,res: Response , next: NextFu
     
     try{
 
-        const property = await Property.find({user:req.user})
+        const property = await Property.find({userId:req.user.id})
         
         return res.status(201).json(property)
 
@@ -74,7 +73,7 @@ export const getUserProperty = async (req: Request ,res: Response , next: NextFu
 }
 
 type Property = {
-    user:string,
+    userId:string,
     title:string,
     body:string,
     description:object
@@ -89,7 +88,7 @@ export const updateProperty = async (req: Request ,res: Response , next: NextFun
 
         let property : Property | null = await Property.findById(id)
 
-        if(property!.user.toString() != req.user._id){
+        if(property!.userId.toString() != req.user.id){
             return res.status(400).json({message: "Not Allowed"})
         }
 
@@ -114,7 +113,7 @@ export const deleteProperty = async (req: Request ,res: Response , next: NextFun
 
         let property : Property | null = await Property.findById(id)
 
-        if(property!.user.toString() != req.user._id){
+        if(property!.userId.toString() != req.user.id){
             return res.status(400).json({message: "Not Allowed"})
         }
 

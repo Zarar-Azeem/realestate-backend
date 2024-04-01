@@ -5,10 +5,8 @@ import env from "../utils/validateEnv"
 declare module 'express-serve-static-core' {
     interface Request{
       user: {
-        _id: string,
+        id: string,
         name: string,
-        email: string,
-        password: string
       }
     } 
    
@@ -21,6 +19,7 @@ export const requireAuth = async (req : Request, res: Response, next: NextFuncti
     if(!token){
         res.status(401).json({message: "Token is required"})
     }
+
     try {
         
         const data = jwt.verify(token! , env.JWT_TOKEN) as Request
