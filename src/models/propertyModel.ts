@@ -7,12 +7,14 @@ const propertySchema = new Schema({
         type : mongoose.Schema.Types.ObjectId,
         ref : "user"
     },
-    title: {type:String, required: true},
-    body:String,
-    description:{
-        rooms:Number,
+    title: {type: String, require:true} ,
+    body: String,
+    price: Number,
+    saved: {type:Boolean , default:false},
+    description: {
+        bedrooms:Number,
         bathrooms:Number,
-        area: Number,
+        size: Number,
         location: String
     }
 }, {timestamps:true})

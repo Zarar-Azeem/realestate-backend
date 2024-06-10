@@ -1,24 +1,24 @@
 import bcrypt from "bcrypt"
-import { NextFunction, Request, RequestHandler, Response } from "express"
-import jwt from "jsonwebtoken"
+import e, { NextFunction, Request, RequestHandler, Response } from "express"
 import User from "../models/userModel"
-import env from "../utils/validateEnv"
+import { generateTokenAndCookie } from "../utils/generateToken"
 
 type registerUser = {
     name: string
     email:string
     password:string
+    phonenumber:string
 }
 
 export const registerUser : RequestHandler = async (req :Request, res: Response , next : NextFunction)=>{
 
-    const  {name, email, password} : registerUser = req.body
+    const  {name, email, password } : registerUser = req.body
     
     try {
 
         let success = false
 
-        if(!name || !email || ! password){
+        if(!name || !email || !password){
             return res.status(401).json({success, message:"Please enter all fields"})
         }
 
@@ -33,20 +33,19 @@ export const registerUser : RequestHandler = async (req :Request, res: Response 
         user = await User.create({
             name,
             email,
-            password:secpass
+            password: secpass
         })
 
-        const payload = {
-            id: user._id,
-            name: name
-        }
-
-        const token = jwt.sign({user:payload}, env.JWT_TOKEN)
-
-
         success = true
+        
+        generateTokenAndCookie(res , user._id)
 
-        return res.status(201).json({success , message: "User created Succesfully", token})
+        res.status(201).json({success ,
+             user: {
+                id: user._id,
+                name: user.name,
+                email: user.email,
+             }})
 
 
     } catch (error) {
@@ -83,19 +82,131 @@ export const loginUser : RequestHandler = async (req :Request, res: Response , n
             return res.status(401).json({success , message : "Enter correct credentials"})
         }
 
-        const payload = {
-            id: user._id,
-            name: user.name
-        }
-
-        const token = jwt.sign({user:payload}, env.JWT_TOKEN)
-
         success = true
+        
+        generateTokenAndCookie(res , user._id)
 
-        return res.status(201).json({success, message:"Logged in Successfully", token})
+        res.status(201).json({success , user: {
+            id: user._id,
+            name: user.name,
+            email: user.email,
+            number: user?.number,
+        }})
 
     } catch (error) {
         next(error)
     }
 
+}
+
+export const logOutUser : RequestHandler =async (req :Request, res: Response , next: NextFunction) => {
+    try {
+        res.cookie('authToken', '', { maxAge: 0, httpOnly: true, expires: new Date(0) })
+        res.status(200).json({message: "Logged out successfully"})
+    } catch (error) {
+        next(error)
+    }
+}
+
+type GetUser = {
+    _id: string
+    name:string,
+    email:string,
+    number: number
+} | null
+
+export const getAuthUser : RequestHandler = async (req :Request, res: Response , next: NextFunction) => {
+        try {
+            const user : GetUser = await User.findById(req.user!.id)
+            res.status(201).send({
+                id:user?._id,
+                name: user?.name,
+                email: user?.email, 
+                number: user?.number
+                })
+            
+        } catch (error) {
+            next(error)
+        }
+}
+export const getUser : RequestHandler = async (req :Request, res: Response , next: NextFunction) => {
+        const { id } = req.params
+        try {
+            const user : GetUser = await User.findById(id)
+            res.status(201).send({
+                id:user?._id,
+                name: user?.name,
+                email: user?.email, 
+                number: user?.number
+                })
+            
+        } catch (error) {
+            next(error)
+        }
+}
+
+
+export const updateUser = async (req :Request, res: Response , next: NextFunction)=>{
+    const {name, email, number, password} = req.body
+
+    try {
+
+        let user = await User.findById(req.user.id)
+        if(!user){
+            return res.status(400).json({message: "User not found"})
+        }
+
+        let newName = await User.findOne({name})
+
+        if(newName){
+            if(user.name === name) {
+                user.name = name
+            } else {    
+                return res.status(400).json({message: "Name is already taken"})
+            }
+        }
+
+        let newEmail = await User.findOne({email})
+        if(newEmail){
+            if(user.email === email) {
+                user.email = email
+            } else {    
+                return res.status(400).json({message: "Email is already taken"})
+            }
+        }
+
+        if(password){
+            const salt = await bcrypt.genSalt(10)
+            const secpass : string = await bcrypt.hash(password, salt)
+            user.password =  secpass || user.password
+        }
+
+
+        user.name = name || user.name
+        user.email = email || user.email
+        user.number = number || user.number
+
+        await user.save()
+
+        res.status(201).json({success:true ,message: "User updated successfully"})
+        
+    } catch (error) {
+        next(error)
+    }
+}
+
+export const deleteUser = async (req :Request, res: Response , next: NextFunction)=>{
+    try{
+        const user = await User.findByIdAndDelete(req.user.id)
+        res.status(201).send({
+            message: "User deleted successfully",
+            user:{
+                name: user?.name,
+                email: user?.email, 
+                number: user?.number,
+                }
+            })
+    } catch (error) {
+        next(error)
+    }
 }

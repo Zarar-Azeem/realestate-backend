@@ -1,29 +1,23 @@
 import { NextFunction, Request, Response} from "express"
-import jwt from"jsonwebtoken"
+import jwt, { JwtPayload } from"jsonwebtoken"
 import env from "../utils/validateEnv"
-
-declare module 'express-serve-static-core' {
-    interface Request{
-      user: {
-        id: string,
-        name: string,
-      }
-    } 
-   
-}
-
+import User from '../models/userModel'
+declare module "express-serve-static-core" {
+    interface Request {
+        user: any
+    }
+ }
 
 export const requireAuth = async (req : Request, res: Response, next: NextFunction)=>{
-    const token = req.header('authToken')
-
+    const token = req.cookies.authToken
     if(!token){
-        res.status(401).json({message: "Token is required"})
+        res.status(401).json({message: "Not Authorized"})
     }
 
     try {
         
-        const data = jwt.verify(token! , env.JWT_TOKEN) as Request
-        req.user = data.user
+        const data = jwt.verify(token! , env.JWT_SECRET) as {userId : string}
+        req.user  = await User.findById(data.userId).select("-password") as {id : string }
         next()
 
     } catch (error) {

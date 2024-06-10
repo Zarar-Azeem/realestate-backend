@@ -6,13 +6,16 @@ import * as PropertyController from "../controllers/propertyController";
 const router = express.Router()
 
 
-router.get('/', PropertyController.getProperties)
-router.get('/getOnlyUserProperties',requireAuth, PropertyController.getUserProperties)
-router.post('/create',requireAuth, PropertyController.createProperty)
+router.get('/',PropertyController.getProperties)
+router.get('/search', PropertyController.searchProperty)
+router.get('/getonlyuserproperties', requireAuth, PropertyController.getUserProperties)
+router.post('/create' , requireAuth , PropertyController.createProperty)
 router.get('/getuserproperty',requireAuth, PropertyController.getUserProperty)
-router.post('/getproperty/:id',requireAuth, PropertyController.getProperty)
-router.put('/updateproperty/:id',requireAuth, PropertyController.updateProperty)
-router.delete('/deleteproperty/:id',requireAuth, PropertyController.deleteProperty)
+router.get('/getsavedproperty',requireAuth, PropertyController.getSavedProperty)
+router.post('/saveproperty',requireAuth, PropertyController.saveProperty)
+router.get('/getproperty/:id',requireAuth, PropertyController.getProperty)
+router.patch('/update/:id',requireAuth, PropertyController.updateProperty)
+router.delete('/delete/:id',requireAuth, PropertyController.deleteProperty)
 
 
 // router.delete('/deletearrayproperty', PropertyController.deleteArrayProperty)
