@@ -10,6 +10,7 @@ const propertySchema = new Schema({
     title: {type: String, require:true} ,
     body: String,
     price: Number,
+    images:[{type: String, require:true}],
     saved: {type:Boolean , default:false},
     description: {
         bedrooms:Number,

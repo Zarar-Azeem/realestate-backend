@@ -1,7 +1,8 @@
 import bcrypt from "bcrypt"
-import e, { NextFunction, Request, RequestHandler, Response } from "express"
+import { NextFunction, Request, RequestHandler, Response } from "express"
 import User from "../models/userModel"
 import { generateTokenAndCookie } from "../utils/generateToken"
+import { uploadOnCloudinary } from "../utils/cloudinary"
 
 type registerUser = {
     name: string
@@ -91,6 +92,7 @@ export const loginUser : RequestHandler = async (req :Request, res: Response , n
             name: user.name,
             email: user.email,
             number: user?.number,
+            avatar: user?.avatar
         }})
 
     } catch (error) {
@@ -112,7 +114,8 @@ type GetUser = {
     _id: string
     name:string,
     email:string,
-    number: number
+    number: number,
+    avatar: string
 } | null
 
 export const getAuthUser : RequestHandler = async (req :Request, res: Response , next: NextFunction) => {
@@ -122,7 +125,8 @@ export const getAuthUser : RequestHandler = async (req :Request, res: Response ,
                 id:user?._id,
                 name: user?.name,
                 email: user?.email, 
-                number: user?.number
+                number: user?.number,
+                avatar: user?.avatar
                 })
             
         } catch (error) {
@@ -137,7 +141,8 @@ export const getUser : RequestHandler = async (req :Request, res: Response , nex
                 id:user?._id,
                 name: user?.name,
                 email: user?.email, 
-                number: user?.number
+                number: user?.number,
+                avatar: user?.avatar
                 })
             
         } catch (error) {
@@ -148,7 +153,9 @@ export const getUser : RequestHandler = async (req :Request, res: Response , nex
 
 export const updateUser = async (req :Request, res: Response , next: NextFunction)=>{
     const {name, email, number, password} = req.body
-
+    const avatarLocalPath = req.file?.path;
+    console.log(req.file)
+    console.log(avatarLocalPath) 
     try {
 
         let user = await User.findById(req.user.id)
@@ -181,10 +188,13 @@ export const updateUser = async (req :Request, res: Response , next: NextFunctio
             user.password =  secpass || user.password
         }
 
+        const upload = await uploadOnCloudinary(avatarLocalPath);
+
 
         user.name = name || user.name
         user.email = email || user.email
         user.number = number || user.number
+        user.avatar = upload?.secure_url || user.avatar
 
         await user.save()
 
@@ -209,4 +219,10 @@ export const deleteUser = async (req :Request, res: Response , next: NextFunctio
     } catch (error) {
         next(error)
     }
+}
+
+export const uploadAvatar = async (req :Request, res: Response , next: NextFunction)=>{
+    const avatarLocalPath = req.file?.path;
+    console.log(req.file?.path)
+    console.log(req.files)
 }

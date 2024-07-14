@@ -6,10 +6,7 @@ const userSchema = new Schema({
     email: {type:String, required:true, unique:true},
     number: {type:Number,  unique:true},
     password: {type: String, required:true},
-    savedProperty: [{
-        type : mongoose.Schema.Types.ObjectId,
-        ref : "property"
-    }]
+    avatar: { type: String },
 }, {timestamps:true})
 
 type Property = InferSchemaType<typeof userSchema>

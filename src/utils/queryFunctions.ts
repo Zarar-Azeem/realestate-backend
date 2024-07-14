@@ -14,11 +14,11 @@ type Property = {
 export const getLocation = ( properties : any, value: string ): Property[] =>{
     let result : Property[] = []
     
-    if( value == undefined){
+    if( value == undefined || value.length == 0 ){
         return properties
     } else {
         for ( let i=0; i<properties.length; i++ ){
-            if( properties[i].description.location == value){
+            if( (properties[i].description.location).toLowerCase() == value.toLowerCase() ){
             result.push(properties[i])
             }
         }
@@ -29,7 +29,7 @@ export const getLocation = ( properties : any, value: string ): Property[] =>{
 export const getBedrooms = ( properties : Property[] , value: string ) : Property[] =>{
     let result : Property[] = []
     
-    if( value == undefined){
+    if( value == undefined || value == ''){
         return properties
     } else {
         for ( let i=0; i<properties.length; i++ ){
