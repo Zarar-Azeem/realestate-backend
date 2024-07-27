@@ -7,6 +7,9 @@ const userSchema = new Schema({
     number: {type:Number,  unique:true},
     password: {type: String, required:true},
     avatar: { type: String },
+    savedProperties: [
+        String
+    ]
 }, {timestamps:true})
 
 type Property = InferSchemaType<typeof userSchema>

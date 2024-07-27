@@ -1,3 +1,6 @@
+import { ObjectId } from "mongodb"
+import Property from '../models/propertyModel'
+
 type Property = {
     title: string,
     body: string,
@@ -52,3 +55,14 @@ export const getBedrooms = ( properties : Property[] , value: string ) : Propert
 //     }
 //     return result
 // }   
+
+
+export const getFullSavedProperties = async (propertyIds : any) => {
+    try {
+      const savedPosts = await Property.find({ _id: { $in: propertyIds } });
+      return savedPosts;
+    } catch (error) {
+      console.error(error);
+      return null;
+    }
+  };

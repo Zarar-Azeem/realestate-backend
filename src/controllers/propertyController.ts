@@ -2,7 +2,8 @@ import type { NextFunction, Request, RequestHandler, Response } from "express"
 import Property from "../models/propertyModel"
 import User from "../models/userModel"
 import { ObjectId } from "mongodb"
-import { getBedrooms, getLocation } from "../utils/queryFunctions"
+import { getBedrooms, getFullSavedProperties, getLocation } from "../utils/queryFunctions"
+import { uploadOnCloudinary } from "../utils/cloudinary"
 
 type reqBody = {
     title:string,
@@ -36,26 +37,52 @@ export const getUserProperties : RequestHandler =  async (req: Request ,res: Res
     }
 }
 
-// export const getSavedProperty = async (req: Request ,res: Response , next: NextFunction)=>{
-//     try {
-//         const propertiesIds = await User.findById(req.user.id).populate('savedProperty');
-//         const properties = getFullSavedProperties(propertiesIds?.savedProperty ?? [])
-//         res.status(200).json(properties)
-//     } catch (error) {
-//         next(error)
-//     }
-// }
+export const getSavedProperty = async (req: Request ,res: Response , next: NextFunction)=>{
+    const { id } = req.user
+    try {
+        let properties = await User.findById(id).select('savedProperties')
+        const savedProperties = await getFullSavedProperties(properties?.savedProperties)
+        return res.status(200).json(savedProperties)
+    } catch (error) {
+        next(error)
+    }
+}
 
-// export const saveProperty = async (req: Request ,res: Response , next: NextFunction)=>{
-//     const id : string = req.params.id
-//     try{
-//         const property = await Property.findById({_id: id}).select('_id')
-//         await User.findByIdAndUpdate(req.user.id, {$push: {savedProperty: property}})
-//         res.status(201).json(property)
-//     } catch (error) {
-//         next(error)
-//     }
-// }
+export const saveProperty = async (req: Request ,res: Response , next: NextFunction)=>{
+    const id : string = req.params.id
+    const userId = req.user.id
+    try{
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+        const propertyExists = await Property.findById({_id: id})
+        if(!propertyExists){
+            return res.status(404).json({ message: 'Property does not exists' });
+        }
+        
+        const savedProperties = user.savedProperties
+        const propertyIndex = savedProperties.indexOf(id);
+        let property , message;
+
+        if(savedProperties.includes(id)){
+            property = savedProperties.splice(propertyIndex, 1);
+            message = " Property Removed" 
+        } else {
+            property = savedProperties.push(id)
+            message = " Property Added" 
+        }
+
+        await user.save()
+        
+        return res.status(200).json({message,property: id});
+
+        
+        
+    } catch (error) {
+        next(error)
+    }
+}
 
 type SearchBody = {
     type: string,
@@ -95,14 +122,21 @@ export const searchProperty : RequestHandler<Params, ReqBody , ResBody , SearchB
 
 export const createProperty = async (req: Request ,res: Response , next: NextFunction)=>{
     const { title, body,price, size, bathrooms,bedrooms,location } : reqBody = req.body
-    console.log(req.file)
-    console.log(req.files)
-    console.log(req.body)
-    // return res.status(200).json(req.file)
+    let reqFiles = req.files as any
+    let imageUrlList = [];
+
+        for (var i = 0; i < reqFiles.length; i++) {
+
+            let locaFilePath = reqFiles[i]
+
+            let result  = await uploadOnCloudinary(locaFilePath.path);
+            imageUrlList.push(result?.secure_url);
+        }
     try {
         const property = await Property.create({
             userId:req.user.id,
             title,
+            images:imageUrlList,
             price,
             body,
             description : {
@@ -209,13 +243,3 @@ export const deleteProperty = async (req: Request ,res: Response , next: NextFun
 //     }
 // }
 
-
-const getFullSavedProperties = async (propertyIds : ObjectId[]) => {
-    try {
-      const savedPosts = await Property.find({ _id: { $in: propertyIds } });
-      return savedPosts;
-    } catch (error) {
-      console.error(error);
-      return null;
-    }
-  };
