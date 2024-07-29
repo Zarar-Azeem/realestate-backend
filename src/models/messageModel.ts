@@ -1,25 +1,22 @@
-const mongoose = require("mongoose");
+import mongoose , { InferSchemaType, model, Schema } from "mongoose";
 
-const MessageSchema = mongoose.Schema(
-  {
-    message: {
-      text: { type: String, required: true },
-    },
-    // users: Array,
+
+
+const MessageSchema =  new Schema({
     reciever: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
+        type : mongoose.Schema.Types.ObjectId,
+        ref: "user",
+        required: true,
     },
     sender: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
+        type : mongoose.Schema.Types.ObjectId,
+        ref: "user",
+        required: true,
     },
-  },
-  {
-    timestamps: true,
-  }
+    message: { type: String, required: true }
+  }, { timestamps: true  }
 );
 
-module.exports = mongoose.model("Messages", MessageSchema);
+type Message = InferSchemaType<typeof MessageSchema>
+
+export default model<Message>("message", MessageSchema);

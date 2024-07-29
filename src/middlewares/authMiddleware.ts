@@ -4,7 +4,9 @@ import env from "../utils/validateEnv"
 import User from '../models/userModel'
 declare module "express-serve-static-core" {
     interface Request {
-        user: any
+        user: {
+            id: string
+        }
     }
  }
 

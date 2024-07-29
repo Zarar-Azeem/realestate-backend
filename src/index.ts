@@ -6,6 +6,7 @@ import env from "./utils/validateEnv";
 import { errorHandler, pageNotFoundHandler } from "./utils/errorHandler";
 import propertyRouter from "./routes/propertyRoutes";
 import userRouter from "./routes/userRoutes";
+import messageRouter from "./routes/messageRoutes";
 import cookieParser from "cookie-parser";
 
 
@@ -25,6 +26,7 @@ app.use(cookieParser());
 
 app.use('/api/property', propertyRouter )
 app.use('/api/user', userRouter )
+app.use('/api/message', messageRouter )
 
 app.use(pageNotFoundHandler)
 app.use(errorHandler)
