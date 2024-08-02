@@ -9,8 +9,9 @@ import userRouter from "./routes/userRoutes";
 import messageRouter from "./routes/messageRoutes";
 import cookieParser from "cookie-parser";
 
-
 const app : Express = express()
+
+
 
 connectToMongoose()
 

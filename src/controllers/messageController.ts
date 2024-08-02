@@ -5,8 +5,7 @@ import Message from '../models/messageModel'
 
 
 export const sendMessage = async (req: Request ,res: Response , next: NextFunction) => {
-  const { message } = req.body
-  const { id : receiverId } = req.params
+  const { input , id : receiverId } = req.body
   const senderId = req.user.id
    
   try {
@@ -21,7 +20,7 @@ export const sendMessage = async (req: Request ,res: Response , next: NextFuncti
     }
   
     const newMessage = await Message.create({
-      message:message,
+      message:input,
       sender:senderId,
       reciever:receiverId,
     })
@@ -46,34 +45,36 @@ export const getMessages = async (req: Request ,res: Response , next: NextFuncti
       
       const chat = await Chat.findOne({
         participants: { $all: [sender, reciever] },
-      }).populate('messages')
+      }).populate('messages').populate({
+        path: 'participants',
+        match: { _id: reciever },
+        select: 'name' // or any other fields you need
+      })
 
       if(!chat) return res.status(404).json([])
       
-      return res.status(200).json(chat.messages)
+      return res.status(200).json(chat)
 
     } catch (error) {
       next(error)
     }
 }
 
-export const getMessagedUsers = async (req: Request ,res: Response , next: NextFunction) => {
-
-  const sender = req.user.id
-
+export const getMessagedUsers = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const messages = await Message.find({ sender }).populate('reciever');
+    const currentUser = req.user.id;
 
-    // Extract unique receiver IDs
-    const receiverIds = messages.map(message => message.reciever._id);
+    // Find all chats the current user is part of
+    const chats = await Chat.find({ participants: currentUser }).populate('participants');
 
-    // Populate user information for each receiver ID
-    const users = await User.find({ _id: { $in: receiverIds } }, 'name');
+    // Extract other participants' names
+    const otherParticipants = chats.flatMap(chat => chat.participants.filter(p => p._id.toString() !== currentUser));
+    const userNames = otherParticipants.map(user => user._id)
+    const users = await User.find({_id: userNames}).select("name")
 
-
-    return res.status(200).json(users)
+    res.json(users);
   } catch (error) {
-    console.log(error)
-    next(error)
+    console.error(error);
+    next(error);
   }
-}
+};

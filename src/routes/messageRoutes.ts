@@ -4,8 +4,8 @@ import { requireAuth } from "../middlewares/authMiddleware";
 
 const router = express.Router()
 
+router.get('/go' , requireAuth, messageController.getMessagedUsers)
 router.get('/:id' , requireAuth ,messageController.getMessages)
-router.get('/getmessagedusers', requireAuth, messageController.getMessagedUsers)
-router.post('/send/:id' , requireAuth ,messageController.sendMessage)
+router.post('/send' , requireAuth ,messageController.sendMessage)
 
 export default router
