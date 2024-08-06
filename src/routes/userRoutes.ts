@@ -13,7 +13,7 @@ router.post('/logout',requireAuth , userController.logOutUser)
 router.patch('/updateuser',requireAuth , upload.single("avatar"),  userController.updateUser)
 router.delete('/deleteuser', requireAuth , userController.deleteUser)
 router.get('/getauthuser', requireAuth ,userController.getAuthUser)
-router.get('/getuser/:id', requireAuth ,userController.getUser)
+router.get('/getuser/:id',userController.getUser)
 router.post('/upload', requireAuth, upload.single('avatar') ,userController.uploadAvatar)
 
 

@@ -2,19 +2,54 @@ import type { NextFunction, Request, RequestHandler, Response } from "express"
 import Property from "../models/propertyModel"
 import User from "../models/userModel"
 import { ObjectId } from "mongodb"
-import { getBedrooms, getFullSavedProperties, getLocation } from "../utils/queryFunctions"
+import { getFullSavedProperties } from "../utils/queryFunctions"
 import { uploadOnCloudinary } from "../utils/cloudinary"
+
+enum Type {
+    RENT = 'rent',
+    SELL = 'sell'
+}
+enum PropertyType {
+    LAND = 'land',
+    HOUSE = 'house',
+    APPARTMENT = 'appartment'
+}
+
+type Property = {
+    userId:string,
+    title:string,
+    body:string,
+    description:object
+}
 
 type reqBody = {
     title:string,
     body:string,
     price:number,
+    type: Type,
+    propertytype: PropertyType,
     images?:string[]
     location :string,
     bedrooms: number,
     bathrooms: number,
     size: number
     
+}
+
+type SearchBody = {
+    type: string,
+    propertytype: string,
+    location: string,
+    minPrice: string,
+    maxPrice: string,
+    bedrooms: string,
+}
+type Params = {};
+type ResBody = {
+    
+};
+type ReqBody = {
+
 }
 
 export const getProperties : RequestHandler =  async (req: Request ,res: Response , next: NextFunction)=>{
@@ -84,23 +119,11 @@ export const saveProperty = async (req: Request ,res: Response , next: NextFunct
     }
 }
 
-type SearchBody = {
-    type: string,
-    location: string,
-    minPrice: string,
-    maxPrice: string,
-    bedrooms: string,
-}
-type Params = {};
-type ResBody = {
-    
-};
-type ReqBody = {
-
-}
 
 export const searchProperty : RequestHandler<Params, ReqBody , ResBody , SearchBody> = async (req,res, next)=>{
     const query = req.query 
+    const type = query.type 
+    const propertytype = query.propertytype 
     const bedrooms = query.bedrooms
     const location = query.location 
     const minPrice = query.minPrice ?? 0
@@ -108,20 +131,30 @@ export const searchProperty : RequestHandler<Params, ReqBody , ResBody , SearchB
     console.log(typeof maxPrice , maxPrice)
     let result;
    try{
-    console.log(location)
-    result = await Property.find().where({ price: { $gte: parseInt(minPrice), $lte: parseInt(maxPrice) } })
-    let result2 = getLocation(result , location)
-    let result3 = getBedrooms(result2 , bedrooms)
-    res.status(200).json(result3)
+    let query : any  = { price: { $gte: parseInt(minPrice), $lte: parseInt(maxPrice) } };
+
+    if (location) {
+        query['description.location'] = location;
+    }
+    if (type) {
+        query['type'] = type;
+    }
+    if (propertytype) {
+        query['propertytype'] = propertytype;
+    }
+    if (bedrooms) {
+        query['description.bedrooms'] = bedrooms;
+    }
+    result = await Property.find(query)
+    res.status(200).json(result)
     
    } catch(err){
-    console.log('dsa')
     next(err)
    }
 } 
 
 export const createProperty = async (req: Request ,res: Response , next: NextFunction)=>{
-    const { title, body,price, size, bathrooms,bedrooms,location } : reqBody = req.body
+    const { title, body,price,type ,propertytype ,size, bathrooms,bedrooms,location } : reqBody = req.body
     let reqFiles = req.files as any
     let imageUrlList = [];
 
@@ -139,6 +172,8 @@ export const createProperty = async (req: Request ,res: Response , next: NextFun
             images:imageUrlList,
             price,
             body,
+            type,
+            propertytype,
             description : {
                 location,
                 bathrooms,
@@ -176,12 +211,7 @@ export const getUserProperty = async (req: Request ,res: Response , next: NextFu
     }
 }
 
-type Property = {
-    userId:string,
-    title:string,
-    body:string,
-    description:object
-}
+
 
 export const updateProperty = async (req: Request ,res: Response , next: NextFunction)=>{
 

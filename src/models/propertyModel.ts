@@ -11,7 +11,16 @@ const propertySchema = new Schema({
     body: String,
     price: Number,
     images:[{type: String, require:true}],
-    saved: {type:Boolean , default:false},
+    type: {
+        type: String,
+        enum: ['sell', 'rent'],
+        required: true
+    },
+    property: {
+        type: String,
+        enum: ['house', 'appartment' , 'land'],
+        required: true
+    },
     description: {
         bedrooms:Number,
         bathrooms:Number,

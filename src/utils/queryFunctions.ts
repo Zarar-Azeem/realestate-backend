@@ -14,35 +14,6 @@ type Property = {
 }
 
 
-export const getLocation = ( properties : any, value: string ): Property[] =>{
-    let result : Property[] = []
-    
-    if( value == undefined || value.length == 0 ){
-        return properties
-    } else {
-        for ( let i=0; i<properties.length; i++ ){
-            if( (properties[i].description.location).toLowerCase() == value.toLowerCase() ){
-            result.push(properties[i])
-            }
-        }
-    }
-    return result
-}   
-
-export const getBedrooms = ( properties : Property[] , value: string ) : Property[] =>{
-    let result : Property[] = []
-    
-    if( value == undefined || value == ''){
-        return properties
-    } else {
-        for ( let i=0; i<properties.length; i++ ){
-            if( properties[i].description.bedrooms == parseInt(value)){
-            result.push(properties[i])
-            }
-        }
-    }
-    return result
-}   
 
 // export const getType = ( properties : Property[] , value: number ) =>{
 //     let result : Property[] = []

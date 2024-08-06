@@ -25,7 +25,7 @@ export const registerUser : RequestHandler = async (req :Request, res: Response 
 
         let  user = await User.findOne({email})
         if(user){
-            return res.status(400).json({success, message: "Email is already taken"})
+            return res.status(401).json({success, message: "Email is already taken"})
         }
 
         const salt = await bcrypt.genSalt(10)
