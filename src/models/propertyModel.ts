@@ -2,7 +2,6 @@ import mongoose, { InferSchemaType, Schema, model } from "mongoose";
 
 
 const propertySchema = new Schema({
-    
     userId:{
         type : mongoose.Schema.Types.ObjectId,
         ref : "user"

@@ -13,7 +13,7 @@ router.get('/getonlyuserproperties', requireAuth, PropertyController.getUserProp
 router.post('/create' , requireAuth, upload.array("pics", 7) , PropertyController.createProperty)
 router.get('/getuserproperty',requireAuth, PropertyController.getUserProperty)
 router.get('/savedproperties',requireAuth, PropertyController.getSavedProperty)
-router.post('/saveproperty/:id',requireAuth, PropertyController.saveProperty)
+router.post('/saveproperty/:id', requireAuth, PropertyController.saveProperty)
 router.get('/getproperty/:id', PropertyController.getProperty)
 router.patch('/update/:id',requireAuth, PropertyController.updateProperty)
 router.delete('/delete/:id',requireAuth, PropertyController.deleteProperty)

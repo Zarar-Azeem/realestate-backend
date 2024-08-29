@@ -158,6 +158,7 @@ export const createProperty = async (req: Request ,res: Response , next: NextFun
     let reqFiles = req.files as any
     let imageUrlList = [];
 
+    if(reqFiles){
         for (var i = 0; i < reqFiles.length; i++) {
 
             let locaFilePath = reqFiles[i]
@@ -165,6 +166,8 @@ export const createProperty = async (req: Request ,res: Response , next: NextFun
             let result  = await uploadOnCloudinary(locaFilePath.path);
             imageUrlList.push(result?.secure_url);
         }
+    }
+        
     try {
         const property = await Property.create({
             userId:req.user.id,
@@ -173,7 +176,7 @@ export const createProperty = async (req: Request ,res: Response , next: NextFun
             price,
             body,
             type,
-            propertytype,
+            property: propertytype,
             description : {
                 location,
                 bathrooms,
@@ -183,6 +186,7 @@ export const createProperty = async (req: Request ,res: Response , next: NextFun
 
         return res.status(201).json({success: true, property})
     } catch (error) {
+        console.log(error)
         next(error)
     }
 }
