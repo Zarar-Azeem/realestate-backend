@@ -8,7 +8,10 @@ export const generateTokenAndCookie = (res : Response, userId : any) => {
     const token = jwt.sign({userId}, env.JWT_SECRET)
 
     const cookieOptions: CookieOptions = { httpOnly: true  }
-
-    res.cookie('authToken', token , cookieOptions);
+    res.cookie('authToken', token, { 
+        httpOnly: true, 
+        secure: false, // Disable in development
+        sameSite: 'lax', // Helps with cross-origin cookie issues
+    });
 
 }

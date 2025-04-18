@@ -11,14 +11,11 @@ import cookieParser from "cookie-parser";
 
 const app : Express = express()
 
-
-
 connectToMongoose()
 
 app.use(cors({
-    origin: env.CLIENT_URL,
-    methods: ['PATCH' , 'DELETE'],
-    credentials:true,
+    origin: 'http://localhost:5173', // Your frontend URL
+    credentials: true,
 }))
 
 app.use(express.json());

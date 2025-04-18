@@ -11,15 +11,18 @@ declare module "express-serve-static-core" {
  }
 
 export const requireAuth = async (req : Request, res: Response, next: NextFunction)=>{
+    console.log("This ran")
+    console.log(req.cookies.authToken)
     const token = req.cookies.authToken
     if(!token){
-        res.status(401).json({message: "Not Authorized"})
+        return res.status(401).json({message: "Not Authorized"})
     }
-
+    console.log("This ran too")
     try {
         
         const data = jwt.verify(token! , env.JWT_SECRET) as {userId : string}
         req.user  = await User.findById(data.userId).select("-password") as {id : string }
+        console.log("This ran too00000000")
         next()
 
     } catch (error) {

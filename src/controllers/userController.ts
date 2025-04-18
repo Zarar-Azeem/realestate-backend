@@ -62,9 +62,9 @@ type loginUser = {
 export const loginUser : RequestHandler = async (req :Request, res: Response , next: NextFunction)=>{
 
     const  {email, password} : loginUser = req.body
-
     try {
-
+        
+        console.log("Iam here")
         let success = false
 
         if(!email || !password){
@@ -83,9 +83,11 @@ export const loginUser : RequestHandler = async (req :Request, res: Response , n
             return res.status(401).json({success , message : "Enter correct credentials"})
         }
 
+        console.log("Iam here2")
         success = true
         
-        generateTokenAndCookie(res , user._id)
+        const token = generateTokenAndCookie(res , user._id)
+        console.log()
 
         res.status(201).json({success , user: {
             id: user._id,
@@ -94,6 +96,7 @@ export const loginUser : RequestHandler = async (req :Request, res: Response , n
             number: user?.number,
             avatar: user?.avatar
         }})
+        return 
 
     } catch (error) {
         next(error)
@@ -121,6 +124,7 @@ type GetUser = {
 export const getAuthUser : RequestHandler = async (req :Request, res: Response , next: NextFunction) => {
         try {
             const user : GetUser = await User.findById(req.user!.id)
+            console.log(user)
             res.status(201).send({
                 id:user?._id,
                 name: user?.name,
